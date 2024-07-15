@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenVidu Room Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        input, button {
+            margin: 5px 0;
+        }
+
+        .container {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<h1>OpenVidu Room Management</h1>
+
+<div class="container">
+    <h2>Create Room</h2>
+    <button onclick="createRoom()">Create Room</button>
+    <div id="newRoomInfo"></div>
+</div>
+
+<div class="container">
+    <h2>Save Room to Redis</h2>
+    <input type="text" id="redisRoomId" placeholder="Room ID">
+    <input type="text" id="redisSessionId" placeholder="Session ID">
+    <button onclick="saveRoomToRedis()">Save to Redis</button>
+</div>
+
+<div class="container">
+    <h2>Get Room from Redis</h2>
+    <input type="text" id="getRedisRoomId" placeholder="Room ID">
+    <button onclick="getRoomFromRedis()">Get from Redis</button>
+    <div id="redisRoomInfo"></div>
+</div>
+
+<div class="container">
+    <h2>Save Room to RDBMS</h2>
+    <input type="text" id="rdbmsRoomId" placeholder="Room ID (Optional)">
+    <input type="text" id="rdbmsSessionId" placeholder="Session ID">
+    <button onclick="saveRoomToRdbms()">Save to RDBMS</button>
+</div>
+
+<script>
+    const apiUrl = 'http://localhost:8080/rooms';
+
+    function createRoom() {
+        fetch(`${apiUrl}/create`, {
+            method: 'POST'
+        })
+            .then(response => response.json())
+            .then(data => {
+                const infoDiv = document.getElementById('newRoomInfo');
+                infoDiv.innerHTML = `New Room Created - Room ID: ${data.id}, Session ID: ${data.sessionId}`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function saveRoomToRedis() {
+        const roomId = document.getElementById('redisRoomId').value;
+        const sessionId = document.getElementById('redisSessionId').value;
+
+        fetch(`${apiUrl}/redis`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({id: roomId, sessionId: sessionId})
+        })
+            .then(response => response.text())
+            .then(data => {
+                alert('Room saved to Redis');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function getRoomFromRedis() {
+        const roomId = document.getElementById('getRedisRoomId').value;
+
+        fetch(`${apiUrl}/redis/${roomId}`)
+            .then(response => response.json())
+            .then(data => {
+                const infoDiv = document.getElementById('redisRoomInfo');
+                infoDiv.innerHTML = `Room ID: ${data.id}, Session ID: ${data.sessionId}`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function saveRoomToRdbms() {
+        const roomId = document.getElementById('rdbmsRoomId').value;
+        const sessionId = document.getElementById('rdbmsSessionId').value;
+
+        fetch(`${apiUrl}/rdbms`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({id: roomId, sessionId: sessionId})
+        })
+            .then(response => response.text())
+            .then(data => {
+                alert('Room saved to RDBMS');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+</script>
+</body>
+</html>
